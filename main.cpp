@@ -10,11 +10,11 @@ constexpr TGAColor yellow = { 0, 200, 255, 255 };
 
 void line(int ax, int ay, int bx, int by, TGAImage& framebuffer, TGAColor color)
 {
-    //t: 진행률
-    for (float t = 0; t < 1.; t += 0.02)
+
+    for (float x = ax; x <= bx; x++)
     {
-        int x = std::round(ax + (bx - ax) * t);
-        int y = std::round(ay + (by - ay) * t);
+        float t = (x - ax) / static_cast<float>(bx - ax);
+        int y = std::round(ay + t * (by - ay));
 
         framebuffer.set(x, y, color); //set은 해당 point에 점 찍기
     }
