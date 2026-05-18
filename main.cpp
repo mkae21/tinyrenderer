@@ -1,10 +1,24 @@
 #include "tgaimage.h"
+#include <cmath>
 
 constexpr TGAColor white = { 255, 255, 255, 255 }; // attention, BGRA order
 constexpr TGAColor green = { 0, 255,   0, 255 };
 constexpr TGAColor red = { 0,   0, 255, 255 };
 constexpr TGAColor blue = { 255, 128,  64, 255 };
 constexpr TGAColor yellow = { 0, 200, 255, 255 };
+
+
+void line(int ax, int ay, int bx, int by, TGAImage& framebuffer, TGAColor color)
+{
+    //t: 진행률
+    for (float t = 0; t < 1.; t += 0.02)
+    {
+        int x = std::round(ax + (bx - ax) * t);
+        int y = std::round(ay + (by - ay) * t);
+
+        framebuffer.set(x, y, color); //set은 해당 point에 점 찍기
+    }
+}
 
 int main(int argc, char** argv) {
     constexpr int width = 64;
