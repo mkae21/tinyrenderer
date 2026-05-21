@@ -26,16 +26,23 @@ void line(int ax, int ay, int bx, int by, TGAImage& framebuffer, TGAColor color)
         std::swap(ay, by);
     }
     
-    for (float x = ax; x <= bx; x++)
-    {
-        float t = (x - ax) / static_cast<float>(bx - ax);
-        int y = std::round(ay + t * (by - ay));
+    int y = ay;
+    float error = 0; //offset 측정
 
+    for (float x = ax; x <= bx; x++)//x는 1씩 전진
+    {
         if(steep)
             framebuffer.set(y, x, color); //역 전치해서 출력
         else
             framebuffer.set(x, y, color); //set은 해당 point에 점 찍기
 
+        error += std::abs(by - ay) / static_cast<float>(bx - ax); //크기만 중요하니까 abs 붙임
+        
+        if (error > 0.5)
+        {
+            y += by > ay ? 1 : -1; //1 상승
+            error -= 1.;//올린 만큼 오차 보정 (남은 오차를 유지하기 위해)
+        }
     }
 }
 
