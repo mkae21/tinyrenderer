@@ -1,4 +1,6 @@
 #include "tgaimage.h"
+#include <cstdlib>
+#include <ctime>
 #include <cmath>
 
 constexpr TGAColor white = { 255, 255, 255, 255 }; // attention, BGRA order
@@ -10,18 +12,30 @@ constexpr TGAColor yellow = { 0, 200, 255, 255 };
 
 void line(int ax, int ay, int bx, int by, TGAImage& framebuffer, TGAColor color)
 {
+    bool steep = std::abs(ax - bx) < std::abs(ay - by); //dx보다 dy가 클 때 기울기가 높음
+    
+    if (steep)//transpose image
+    {
+        std::swap(ax, ay);
+        std::swap(bx, by);
+    }
 
+    if (ax > bx) //시작 점이 끝점 보다 클 경우
+    {
+        std::swap(ax, bx);
+        std::swap(ay, by);
+    }
+    
     for (float x = ax; x <= bx; x++)
     {
-        if (ax > bx) //시작 점이 끝점 보다 클 경우
-        {
-            std::swap(ax, bx);
-            std::swap(ay, by);
-        }
         float t = (x - ax) / static_cast<float>(bx - ax);
         int y = std::round(ay + t * (by - ay));
 
-        framebuffer.set(x, y, color); //set은 해당 point에 점 찍기
+        if(steep)
+            framebuffer.set(y, x, color); //역 전치해서 출력
+        else
+            framebuffer.set(x, y, color); //set은 해당 point에 점 찍기
+
     }
 }
 
@@ -30,18 +44,19 @@ int main(int argc, char** argv) {
     constexpr int height = 64;
     TGAImage framebuffer(width, height, TGAImage::RGB);
 
-    int ax = 7, ay = 3;
-    int bx = 12, by = 37;
-    int cx = 62, cy = 53;
+    std::srand(std::time(nullptr));
+    for (int i = 0; i < (1 << 24); i++)
+    {
+        //width,height의 범위 안으로 설정
+        int ax = rand() % width, ay = rand() % height;
+        int bx = rand() % width, by = rand() % height;
 
-    line(ax, ay, bx, by, framebuffer, blue);
-    line(cx, cy, bx, by, framebuffer, green);
-    line(cx, cy, ax, ay, framebuffer, yellow);
-    line(ax, ay, cx, cy, framebuffer, red);
-
-    framebuffer.set(ax, ay, white);
-    framebuffer.set(bx, by, white);
-    framebuffer.set(cx, cy, white);
+        //rand % 256은 int 4bytes다, color는 uint8_t이기에 축소 변환 불가능. 명시적으로 변환한다.
+        line(ax, ay, bx, by, framebuffer, { static_cast<uint8_t>(std::rand() % 256),
+                                            static_cast<uint8_t>(std::rand() % 256),
+                                            static_cast<uint8_t>(std::rand() % 256),
+                                            static_cast<uint8_t>(std::rand() % 256) });
+    }
 
     framebuffer.write_tga_file("framebuffer.tga");
     return 0;
