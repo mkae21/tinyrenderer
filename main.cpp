@@ -13,6 +13,11 @@ void line(int ax, int ay, int bx, int by, TGAImage& framebuffer, TGAColor color)
 
     for (float x = ax; x <= bx; x++)
     {
+        if (ax > bx) //시작 점이 끝점 보다 클 경우
+        {
+            std::swap(ax, bx);
+            std::swap(ay, by);
+        }
         float t = (x - ax) / static_cast<float>(bx - ax);
         int y = std::round(ay + t * (by - ay));
 
